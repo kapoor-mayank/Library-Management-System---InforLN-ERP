@@ -1,0 +1,56 @@
+|*******************************************************************************
+|* trmkt0610m000  E60C_1_trng
+|* Resource MMT
+|* mkapoor
+|* 2023-12-14 [01:13]
+|*******************************************************************************
+|* Script Type: 123
+|*******************************************************************************
+|*	Rev.No. 1  trE60X1trng  14 Dec 23 mkapoor
+|* First MMT
+|*	Rev.No. 2  trE60X1trng  14 Dec 23 mkapoor
+|* MMT
+|*	Rev.No. 3  trE60X1trng  14 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 4  trE60X1trng  14 Dec 23 mkapoor
+|* View Field
+|*	Rev.No. 8  trE60X1trng  17 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 9  trE60X1trng  18 Dec 23 mkapoor
+|* Added Logic for Auto Generate Serial Number
+|*	Rev.No. 10  trE60X1trng  18 Dec 23 mkapoor
+|* Changes In View Field
+|*	Rev.No. 11  trE60X1trng  20 Dec 23 mkapoor
+|* Fix in alignment of fields in MMT
+|*	Rev.No. 12  trE60X1trng  20 Dec 23 mkapoor
+|* Fixed Labels and MMT alignments
+|*	Rev.No. 13  trE60X1trng  20 Dec 23 mkapoor
+|* Removed Print button
+|*	Rev.No. 14  trE60X1trng  21 Dec 23 mkapoor
+|* Added Zoom in appropiate sessions
+|*	Rev.No. 15  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from Code Freeze
+|******************************************************************************
+
+|*************************** declaration section *******************************
+declaration:
+#ident "@(#)trmkt0610m000  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 15  27 Dec 23  mkapoor"
+
+table	ttrmkt010 								|* Resource Master
+table	ttrmkt005								|* Free Number
+extern	domain	trmkt.srno	g.freeno					|* For Storing FreeNumber
+|****************************** program section ********************************
+
+before.new.object:
+	select	trmkt005.*
+	from	trmkt005
+	where	trmkt005.srno = 1
+	as set with 1 rows
+	selectdo
+		trmkt010.srno = trmkt005.frno
+	selectempty
+		message("Something Went Wrong!!!")
+	endselect
+
+|****************************** group section **********************************
+

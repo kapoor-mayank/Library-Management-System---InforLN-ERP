@@ -1,0 +1,60 @@
+|*******************************************************************************
+|* trmkt0130s000  E60C_1_trng
+|* Resource
+|* mkapoor
+|* 2023-12-20 [06:14]
+|*******************************************************************************
+|* Script Type: 123
+|*******************************************************************************
+|*	Rev.No. 1  trE60X1trng  20 Dec 23 mkapoor
+|* Created by LN Studio (Activity mkapoor_012, User mkapoor)
+|* Linked Sub Session
+|*	Rev.No. 2  trE60X1trng  20 Dec 23 mkapoor
+|* Removed Print button
+|*	Rev.No. 3  trE60X1trng  21 Dec 23 mkapoor
+|* Fix in Indentation
+|*	Rev.No. 4  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from Code Freeze
+|******************************************************************************
+
+|*************************** declaration section *******************************
+declaration:
+#ident "@(#)trmkt0130s000  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 4  27 Dec 23  mkapoor"
+
+table	ttrmkt030	|* Resource
+table	ttrmkt005	|* Free Number
+|extern	domain	trmkt.rsrc	g.resource.in
+|****************************** program section ********************************
+before.program:
+|	import("g.resource.out", g.resource.in)
+	
+before.new.object:
+	select	trmkt005.*
+	from	trmkt005
+	where	trmkt005.srno = 5
+	as set with 1 rows
+	selectdo
+		trmkt030.srno = trmkt005.frno
+	selectempty
+		message("Something Went Wrong!!!")
+	endselect
+after.form.read:
+	enable.save.on.occ.change()
+|****************************** group section **********************************
+field.trmkt030.srno:
+after.field:
+	disable.fields("trmkt030.srno", "trmkt030.reid")
+field.trmkt030.type:
+before.input:
+	attr.dorp = true
+field.trmkt030.name:
+before.input:
+	attr.dorp = true
+field.trmkt030.publ:
+before.input:
+	attr.dorp = true
+field.trmkt030.price:
+before.input:
+	attr.dorp = true
+|****************************** group section **********************************
+

@@ -1,0 +1,642 @@
+|*******************************************************************************
+|* trmkt035  E60C_1_trng
+|* Transaction
+|* mkapoor
+|* 2023-12-14 [08:20]
+|*******************************************************************************
+|* Script Type: DAL
+|*******************************************************************************
+|*	Rev.No. 1  trE60X1trng  14 Dec 23 mkapoor
+|* Created by LN Studio (Activity mkapoor_009, User mkapoor)
+|*	Rev.No. 2  trE60X1trng  14 Dec 23 mkapoor
+|* Logic for Planned Return Date
+|*	Rev.No. 3  trE60X1trng  15 Dec 23 mkapoor
+|* added logic for calculating penalty
+|*	Rev.No. 9  trE60X1trng  15 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 10  trE60X1trng  15 Dec 23 mkapoor
+|* Logic for calculating penalty
+|*	Rev.No. 21  trE60X1trng  15 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 22  trE60X1trng  15 Dec 23 mkapoor
+|* Added Logic to Update Resources Status based on Transaction
+|*	Rev.No. 29  trE60X1trng  15 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 30  trE60X1trng  16 Dec 23 mkapoor
+|* Added logic to stop deletion of record
+|*	Rev.No. 33  trE60X1trng  16 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 34  trE60X1trng  16 Dec 23 mkapoor
+|* Logic to update planned return date on renew
+|*	Rev.No. 42  trE60X1trng  16 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 43  trE60X1trng  16 Dec 23 mkapoor
+|* mk
+|*	Rev.No. 52  trE60X1trng  17 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 53  trE60X1trng  17 Dec 23 mkapoor
+|* MKMK
+|*	Rev.No. 54  trE60X1trng  17 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 55  trE60X1trng  18 Dec 23 mkapoor
+|* Changed Index - Made Composite Key
+|*	Rev.No. 56  trE60X1trng  18 Dec 23 mkapoor
+|* Changed Index
+|*	Rev.No. 57  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in index
+|*	Rev.No. 58  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in Index for MMT
+|*	Rev.No. 59  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in Composite Index
+|*	Rev.No. 61  trE60X1trng  18 Dec 23 mkapoor
+|* Changes In Index
+|*	Rev.No. 62  trE60X1trng  18 Dec 23 mkapoor
+|* Added Logic for checking issue date
+|*	Rev.No. 63  trE60X1trng  19 Dec 23 mkapoor
+|* changed query - added index and as set with 1 rows
+|*	Rev.No. 64  trE60X1trng  19 Dec 23 mkapoor
+|* Removed Resource Name Column
+|*	Rev.No. 65  trE60X1trng  19 Dec 23 mkapoor
+|* Added logic for checking penalty present or not
+|*	Rev.No. 66  trE60X1trng  19 Dec 23 mkapoor
+|* Fixed message code
+|*	Rev.No. 67  trE60X1trng  19 Dec 23 mkapoor
+|* Added logic to check resource type with resource id
+|*	Rev.No. 68  trE60X1trng  20 Dec 23 mkapoor
+|* Added extended return date for case of renew
+|*	Rev.No. 69  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic to calculate extended return date in case of renew
+|*	Rev.No. 70  trE60X1trng  20 Dec 23 mkapoor
+|* Disabled fields and logic to check for inactive employee being issued a
+|* resource
+|*	Rev.No. 71  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic for calculating penalty in case of renew and turned in late
+|*	Rev.No. 72  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic to disable actual return date while entering new record
+|*	Rev.No. 73  trE60X1trng  20 Dec 23 mkapoor
+|* Changed logic for return check
+|*	Rev.No. 74  trE60X1trng  20 Dec 23 mkapoor
+|* Check for renew, return improved
+|*	Rev.No. 75  trE60X1trng  20 Dec 23 mkapoor
+|* Disabled fields not to be changed in update mode
+|*	Rev.No. 76  trE60X1trng  20 Dec 23 mkapoor
+|* Made fields disabled in update mode
+|*	Rev.No. 77  trE60X1trng  20 Dec 23 mkapoor
+|* Added check for already issued resource
+|*	Rev.No. 78  trE60X1trng  20 Dec 23 mkapoor
+|* Changed query to work on index
+|*	Rev.No. 79  trE60X1trng  20 Dec 23 mkapoor
+|* Fixed logic for RENEW
+|*	Rev.No. 80  trE60X1trng  20 Dec 23 mkapoor
+|* added logic to disable issued
+|*	Rev.No. 81  trE60X1trng  20 Dec 23 mkapoor
+|* Fix in logic
+|*	Rev.No. 82  trE60X1trng  20 Dec 23 mkapoor
+|* Fix in logic for renew
+|*	Rev.No. 83  trE60X1trng  20 Dec 23 mkapoor
+|* Extended Return Date logic fix
+|*	Rev.No. 84  trE60X1trng  21 Dec 23 mkapoor
+|* Added logic to check for resource which doesn't have penalty in penalty
+|* master
+|*	Rev.No. 85  trE60X1trng  21 Dec 23 mkapoor
+|* Added Message comments
+|*	Rev.No. 86  trE60X1trng  22 Dec 23 mkapoor
+|* Added Business Method
+|*	Rev.No. 87  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from code freeze
+|*	Rev.No. 88  trE60X1trng  27 Dec 23 mkapoor
+|* Added Business Method
+|*	Rev.No. 89  trE60X1trng  27 Dec 23 mkapoor
+|* Removed extended return date column
+|*******************************************************************************
+#ident "@(#)trmkt035  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 89  27 Dec 23  mkapoor"
+                                                                                
+|*************************** declaration section *******************************
+
+#include <bic_dal2>
+table	ttrmkt005	|* Free Numbers
+table	ttrmkt010	|* Resource Master
+table	ttrmkt030	|* Resources
+table	ttrmkt035	|* Transaction
+table	ttrmkt015	|* Penalty Master
+table	ttrmkt020	|* Employee Master
+long	l.numofdays	|* For Storing Number of days to be added or subtracted from date
+double	penalty10	|* For storing the penalty to be applied
+double	penalty20	|* For storing the penalty to be applied
+double	penalty30	|* For storing the penalty to be applied
+double	penaltymo	|* For storing the penalty to be applied
+domain	trmkt.srno	serial
+|*************************** object hooks section *****************************
+
+function extern boolean method.is.allowed(
+			long		i.method)
+{
+	on case i.method
+	case DAL_NEW:
+		break
+	case DAL_UPDATE:
+		break
+	case DAL_DESTROY:
+		break
+	endcase
+	return(true)
+}
+
+function extern long before.open.object.set()
+{
+	dal.field.depends.on("trmkt035.pldt", HOOK_UPDATE, "trmkt035.isdt")
+	dal.field.depends.on("trmkt035.pena", HOOK_UPDATE, "trmkt035.acdt")
+|	dal.field.depends.on("trmkt035.acdt", HOOK_UPDATE, "trmkt035.status")
+|	dal.field.depends.on("trmkt035.status", HOOK_IS_APPLICABLE, "trmkt035.acdt","trmkt035.amtr", "trmkt035.erdt")
+|	dal.field.depends.on("trmkt035.erdt", HOOK_UPDATE, "trmkt035.status")
+|	dal.field.depends.on("trmkt035.rnam", HOOK_UPDATE, "trmkt035.reid")
+|	dal.field.depends.on("trmkt035.status", HOOK_UPDATE, "trmkt035.amtr")
+	return(0)
+}
+
+function extern long before.destroy.object()
+{
+	if trmkt035.status = trmkt.irre.issued
+		or trmkt035.status = trmkt.irre.renew	then
+		dal.set.error.message("trmkt03503")
+		|* Cannot delete transaction having status as issued or renew
+		return(DALHOOKERROR)
+	else
+		return(0)
+	endif
+}
+
+function extern long before.new.object()
+{
+	select	trmkt005.*
+	from	trmkt005
+	where	trmkt005.srno = 6
+	as set with 1 rows
+	selectdo
+		trmkt035.srno = trmkt005.frno
+		serial = trmkt035.srno
+	selectempty
+|		message("Something Went Wrong!!!")
+	endselect
+	return(0)
+}
+
+function extern long after.destroy.object()
+{
+	return(0)
+}
+
+function extern long before.save.object(
+			long		i.mode)
+{
+	return(0)
+}
+
+function extern long after.save.object(long i.mode)
+{
+	long	retval
+	if	i.mode = DAL_NEW	then
+		select	trmkt005.*
+		from	trmkt005	for	update
+		where	trmkt005._index1 = 6
+		as set with 1 rows
+		selectdo
+			trmkt005.frno = trmkt005.frno + 1
+			dal.update("trmkt005", ttrmkt005, retval, false, db.retry)
+		endselect
+		
+		select	trmkt030.*
+		from	trmkt030	for	update
+		where	trmkt030._index1 = :trmkt035.reid
+		as set with 1 rows
+		selectdo
+			trmkt030.aire = trmkt.aire.issued
+			dal.update("trmkt030", ttrmkt030, retval, false, db.retry)
+		endselect
+	endif
+	
+	if	i.mode = DAL_UPDATE and	trmkt035.status = trmkt.irre.return	then
+		select	trmkt030.*
+		from	trmkt030	for	update
+		where	trmkt030._index1 = :trmkt035.reid
+		as set with 1 rows
+		selectdo
+			trmkt030.aire = trmkt.aire.available
+			dal.update("trmkt030", ttrmkt030, retval, false, db.retry)
+		endselect
+	endif
+	
+	if	i.mode = DAL_UPDATE and	trmkt035.status = trmkt.irre.renew	then
+		select	trmkt030.*
+		from	trmkt030	for	update
+		where	trmkt030._index1 = :trmkt035.reid
+		as set with 1 rows
+		selectdo
+			trmkt030.aire = trmkt.aire.renew
+			dal.update("trmkt030", ttrmkt030, retval, false, db.retry)
+		endselect
+	endif
+	return(retval)
+}
+
+|*************************** field hooks section********************************
+function extern void trmkt035.pldt.update(long mode)
+{
+	select	trmkt010.*
+	from	trmkt010
+	where	trmkt010._index1 = {:trmkt035.rsrc}
+	as set with 1 rows
+	selectdo
+		l.numofdays = trmkt010.vidt
+		trmkt035.pldt = trmkt035.isdt + l.numofdays
+	endselect
+}
+|function extern void trmkt035.acdt.update(long mode)
+|{
+|	if trmkt035.status = trmkt.irre.renew	then
+|		trmkt035.acdt = 0
+|	endif
+|}
+|function extern void trmkt035.erdt.update(long mode)
+|{
+|	if trmkt035.status = trmkt.irre.renew 	then
+|		select	trmkt010.*
+|		from	trmkt010
+|		where	trmkt010._index1 = :trmkt035.rsrc
+|		as set with 1 rows
+|		selectdo
+|			l.numofdays = trmkt010.vidt
+|			trmkt035.erdt = trmkt035.pldt + l.numofdays
+|		endselect
+|	endif
+|}
+function extern void trmkt035.pena.update(long mode)
+{
+|	if trmkt035.erdt > 0	then
+|		l.numofdays = trmkt035.acdt - trmkt035.erdt
+|	else
+		l.numofdays = trmkt035.acdt - trmkt035.pldt
+|	endif
+	if l.numofdays > 0	then
+		select	trmkt010.*
+		from	trmkt010
+		where	trmkt010.rsrc = :trmkt035.rsrc
+		selectdo
+			if trmkt010.ptyp = trmkt.ptyp.fixed	then
+				select	trmkt030.*
+				from	trmkt030
+				where	trmkt030.reid = :trmkt035.reid
+				selectdo
+					double	price
+					price = trmkt030.price
+					trmkt035.pena = price * 1.2
+				endselect
+		
+			else
+				select	trmkt015.*
+				from	trmkt015
+				where	trmkt015.rsrc = :trmkt035.rsrc
+				selectdo
+					penalty10 = trmkt015.ut10
+					penalty20 = trmkt015.ut20
+					penalty30 = trmkt015.ut30
+					penaltymo = trmkt015.mo30
+				endselect
+				if l.numofdays > 0 and l.numofdays < 11	then
+					trmkt035.pena = penalty10 * l.numofdays
+				endif
+				if l.numofdays > 10 and l.numofdays < 21 then
+					long	l.numgt10
+					l.numgt10 = l.numofdays - 10
+					trmkt035.pena = (penalty10 * 10) + (penalty20 * l.numgt10)
+				endif
+				if l.numofdays > 20 and l.numofdays < 31 then
+					long	l.numgt20
+					l.numgt20 = l.numofdays - 20
+					trmkt035.pena = (penalty10 * 10) + (penalty20 * 10) + (penalty30 * l.numgt20)
+				endif
+				if l.numofdays > 30	then
+					long	l.numgt30
+					l.numgt30 = l.numofdays - 30
+					trmkt035.pena = (penalty10 * 10) + (penalty20 * 10) + (penalty30 * 10) + (penaltymo * l.numgt30)
+				endif
+		
+			endif
+		endselect
+	else
+		trmkt035.pena = 0.0
+	endif		
+}
+|function extern void trmkt035.rnam.update(long mode)
+|{
+|	select	trmkt030.*
+|	from	trmkt030
+|	where	trmkt030._index1 = :trmkt035.reid
+|	selectdo
+|		trmkt035.rnam = trmkt030.name
+|	selectempty
+|	endselect
+|}
+|function extern boolean trmkt035.status.renew.is.applicable(long mode)
+|{
+|	if trmkt035.erdt = 0 and mode = DAL_UPDATE then
+|		if trmkt035.acdt = trmkt035.pldt then
+|			return(true)
+|		else
+|			dal.set.error.message("trmkt03502")
+|			|* Renew not allowed as resource being returned
+|			|* late
+|			return(false)
+|		endif
+|	else
+|		if trmkt035.acdt <> trmkt035.erdt then
+|			return(true)
+|		else
+|			return(false)
+|		endif
+|	endif
+|	if mode = DAL_UPDATE	then
+|		if trmkt035.acdt = 0 and trmkt035.erdt = 0	then
+|			return(false)
+|		endif
+|		if trmkt035.acdt = trmkt035.pldt	then
+|			return(true)
+|		else
+|			if trmkt035.erdt > 0 and trmkt035.acdt = trmkt035.erdt	then
+|				return(true)
+|			else
+|				dal.set.error.message("trmkt03502")
+|				|* Renew not allowed as resource being returned
+|				|* late
+|				return(false)
+|			endif
+|			if trmkt035.acdt > trmkt035.pldt	then
+|				dal.set.error.message("trmkt03502")
+|				|* Renew not allowed as resource being returned
+|				|* late
+|				return(false)
+|			endif
+|		endif
+|	else
+|		return(false)
+|	endif
+|	return(true)
+|}
+
+|function extern boolean trmkt035.status.return.is.applicable(long mode)
+|{
+||	if double.cmp(trmkt035.pena, trmkt035.amtr, 0.0001) <> 0
+||	or trkmt035.acdt < trmkt035.pldt then
+||		dal.set.error.message("trmkt03501")
+||		
+||	endif
+||	return(true)	
+|	if mode = DAL_UPDATE	then
+|		if trmkt035.acdt = 0	then
+|			return(false)
+|		endif
+|		if double.cmp(trmkt035.amtr, trmkt035.pena, 0.0001) = 0
+|			or double.cmp(trmkt035.amtr, trmkt035.pena, 0.0001) = 1	then
+|			return(true)
+|		else
+|			dal.set.error.message("trmkt03501")
+|			|* Return Not applicable as amount received less than
+|			|* penalty
+|			return(false)
+|		endif
+|	else
+|		return(false)
+|	endif		
+|}
+|function extern boolean trmkt035.status.issued.is.applicable(long mode)
+|{
+|	if trmkt035.acdt > 0 and mode = DAL_UPDATE and trmkt035.pena > 0
+|		and trmkt035.amtr = trmkt035.pena then
+|		return(false)
+|	else
+|		return(true)
+|	endif
+|}
+function extern boolean trmkt035.reid.is.valid(long mode) 
+{
+	if trmkt035.status = trmkt.irre.issued and mode = DAL_NEW	then
+		select	trmkt030.*
+		from	trmkt030
+		where	trmkt030._index1 = :trmkt035.reid
+		and	trmkt030._index3 = :trmkt035.rsrc
+		as set with 1 rows
+		selectdo
+			if trmkt030.aire <> trmkt.aire.available	then
+				dal.set.error.message("trmkt03504")
+				|* Please select a resource with status as
+				|* available
+				return(false)
+			else
+				select	trmkt015.*
+				from	trmkt015
+				where	trmkt015._index2 = :trmkt035.rsrc
+				as set with 1 rows
+				selectdo
+					return(true)
+				selectempty
+					select	trmkt010.*
+					from	trmkt010
+					where	trmkt010._index1 = :trmkt035.rsrc
+					as set with 1 rows
+					selectdo
+						if trmkt010.ptyp = trmkt.ptyp.fixed then
+							return(true)
+						endif
+					endselect
+					dal.set.error.message("trmkt0017")
+					|* Resource cannot be added as penalty
+					|* not present
+					return(false)
+				endselect
+			endif
+		selectempty
+			dal.set.error.message("trmkt0018")
+			|* Resource ID doesn't belong to resource type selected
+			return(false)
+		endselect
+	endif
+	
+	return(true)
+}
+function extern long trmkt035.isdt.check(long mode)
+{
+	if trmkt035.isdt > date.num()	then
+		dal.set.error.message("trmkt0007")
+		|* Future date not allowed while adding a record
+		return(DALHOOKERROR)
+	else
+		return(0)
+	endif
+}
+function extern boolean trmkt035.empid.is.valid(long mode) 
+{
+	select	trmkt020.*
+	from	trmkt020
+	where	trmkt020._index1 = :trmkt035.empid
+	selectdo
+		if trmkt020.status = trmkt.acna.notactive	then
+			dal.set.error.message("trmkt0020")
+			|* Inactive Employee cannot be issued a resource
+			return(false)
+		endif
+	endselect
+	return(true)
+}
+
+function extern boolean trmkt035.acdt.is.valid(long mode)
+{
+	if trmkt035.acdt < trmkt035.isdt then
+		return(false)
+	endif
+	return(true)
+}
+
+function extern boolean trmkt035.acdt.is.derived(long mode)
+{
+	if mode = DAL_NEW	then
+		return(true)
+	else
+		return(false)
+	endif
+}
+function extern boolean trmkt035.empid.is.derived(long mode)
+{
+	if mode = DAL_UPDATE	then
+		return(true)
+	else
+		return(false)
+	endif
+}
+function extern boolean trmkt035.rsrc.is.derived(long mode)
+{
+	if mode = DAL_UPDATE	then
+		return(true)
+	else
+		return(false)
+	endif
+}
+function extern boolean trmkt035.reid.is.derived(long mode)
+{
+	if mode = DAL_UPDATE	then
+		return(true)
+	else
+		return(false)
+	endif
+}
+function extern boolean trmkt035.isdt.is.derived(long mode)
+{
+	if mode = DAL_UPDATE	then
+		return(true)
+	else
+		return(false)
+	endif
+}
+|*************************** business methods section **************************
+function extern long return.resource()
+{
+	long retval
+	if return.resource.is.allowed() then
+		select	trmkt035.*
+		from	trmkt035 for update
+		where trmkt035.srno = :trmkt035.srno
+		selectdo
+			trmkt035.status = trmkt.irre.return
+			dal.update("trmkt035", ttrmkt035, retval, false, db.retry)
+		endselect
+	else
+		dal.set.error.message("trmkt03501")
+		return(DALHOOKERROR)
+		|* Return Not applicable as amount received less tha
+		|* penalty
+	endif
+	return(0)
+		
+}
+
+function extern boolean return.resource.is.allowed()
+{
+	if trmkt035.pena > trmkt035.amtr then
+		dal.set.error.message("trmkt03501")
+		|* Return Not applicable as amount received less than
+		|* penalty
+		return(false)
+	else
+		return(true)
+	endif
+}
+
+function extern long renew.resource()
+{
+	if renew.resource.is.allowed() then
+		long retval
+		select	trmkt035.*
+		from	trmkt035 for update
+		where trmkt035.srno = :trmkt035.srno
+		selectdo
+			trmkt035.status = trmkt.irre.return
+			dal.update("trmkt035", ttrmkt035, retval, false, db.retry)
+			commit.transaction()
+		endselect
+|		select	trmkt030.*
+|		from	trmkt030	for	update
+|		where	trmkt030._index1 = :trmkt035.reid
+|		as set with 1 rows
+|		selectdo
+|			trmkt030.aire = trmkt.aire.available
+|			dal.update("trmkt030", ttrmkt030, retval, false, db.retry)
+|			commit.transaction()
+|		endselect
+		domain	trmkt.date	curr.date,
+					date.diff,
+					plan.date
+		curr.date = date.num()
+		date.diff = trmkt035.pldt - trmkt035.isdt
+		plan.date = curr.date + date.diff
+		long	copy, save
+		domain	trmkt.rsrc	emp,
+					rest,
+					reid
+		emp = trmkt035.empid
+		rest = trmkt035.rsrc
+		reid = trmkt035.reid
+		db.retry.point()
+		copy = dal.copy.object("trmkt035")
+		dal.set.field("trmkt035.empid", emp)
+		dal.set.field("trmkt035.rsrc", rest)
+		dal.set.field("trmkt035.reid", reid)
+		dal.set.field("trmkt035.isdt", curr.date)
+		dal.set.field("trmkt035.pldt", plan.date)
+		dal.set.field("trmkt035.acdt", 0)
+		dal.set.field("trmkt035.status", trmkt.irre.renew)
+		dal.set.field("trmkt035.pena", 0)
+		dal.set.field("trmkt035.amtr", 0)
+|		select	trmkt030.*
+|		from	trmkt030	for	update
+|		where	trmkt030._index1 = :trmkt035.reid
+|		as set with 1 rows
+|		selectdo
+|			trmkt030.aire = trmkt.aire.renew
+|			dal.update("trmkt030", ttrmkt030, retval, false, db.retry)
+|		endselect
+		save = dal.save.object("trmkt035")
+|		commit.transaction()
+		return(0)
+	endif
+	return(DALHOOKERROR)
+}
+
+function extern boolean renew.resource.is.allowed()
+{
+	if trmkt035.acdt = trmkt035.pldt and trmkt035.status = trmkt.irre.issued then
+		return(true)
+	endif
+	return(false)
+}
+
+|*************************** internal functions section ************************
+|*************************** end of DAL source *********************************

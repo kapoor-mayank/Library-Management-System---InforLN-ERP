@@ -1,0 +1,137 @@
+|******************************************************************************
+|* trmkt015  E60C_1_trng
+|* Penalty Master
+|* mkapoor
+|* 2023-12-12 [05:55]
+|******************************************************************************
+|* Script Type: DAL
+|******************************************************************************
+|*	Rev.No. 1  trE60X1trng  12 Dec 23 mkapoor
+|* Fixed Domain
+|*	Rev.No. 5  trE60X1trng  12 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 6  trE60X1trng  14 Dec 23 mkapoor
+|* Added Index on Serial Number
+|*	Rev.No. 7  trE60X1trng  18 Dec 23 mkapoor
+|* Added Logic to check for Negatives
+|*	Rev.No. 8  trE60X1trng  18 Dec 23 mkapoor
+|* Fixed logic for checking negatives
+|*	Rev.No. 9  trE60X1trng  18 Dec 23 mkapoor
+|* Used double.cmp
+|*	Rev.No. 11  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in logic for checking negatives
+|*	Rev.No. 12  trE60X1trng  18 Dec 23 mkapoor
+|* logic foe rejecting negatives
+|*	Rev.No. 13  trE60X1trng  18 Dec 23 mkapoor
+|* Used .check instead of is.valid
+|*	Rev.No. 14  trE60X1trng  19 Dec 23 mkapoor
+|* Added Logic to stop record getting deleted if type present in resource master
+|*	Rev.No. 15  trE60X1trng  19 Dec 23 mkapoor
+|* Added logic to check for increasing penalty
+|*	Rev.No. 17  trE60X1trng  19 Dec 23 mkapoor
+|* Changed check to is valid
+|*	Rev.No. 18  trE60X1trng  19 Dec 23 mkapoor
+|* Added Index in Query
+|*	Rev.No. 19  trE60X1trng  21 Dec 23 mkapoor
+|* Added message
+|*	Rev.No. 20  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from code freeze
+|******************************************************************************
+#ident "@(#)trmkt015  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 20  27 Dec 23  mkapoor"
+                                                                                
+#include <bic_dal2>
+
+table	ttrmkt005	|* Free Number Table
+table	ttrmkt015	|*Penalty Master								
+function extern long before.open.object.set()
+{
+	return(0)
+}
+
+function extern long before.save.object(long type)
+{
+	return(0)
+}
+function extern long before.destroy.object()
+{
+	select	trmkt010.*
+	from	trmkt010
+	where	trmkt010._index1 = :trmkt015.rsrc
+	as set with 1 rows
+	selectdo
+		dal.set.error.message("trmkt0008")
+		|* Type of record present in Record Master, cannot be deleted
+		return(DALHOOKERROR)
+	selectempty
+	endselect
+	return(0)
+}
+function extern long after.save.object(long mode)
+{	long	retval
+	if	mode = DAL_NEW	then
+		select	trmkt005.*
+		from	trmkt005	for	update
+		where	trmkt005._index1 = 2
+		as set with 1 rows
+		selectdo
+			trmkt005.frno = trmkt005.frno + 1
+		dal.update("trmkt005", ttrmkt005, retval, false, db.retry)
+		endselect
+	endif
+	return(retval)
+}
+|function extern boolean trmkt015.srno.is.derived()
+|{
+|	return(true)
+|}
+function extern boolean trmkt015.ut10.is.valid(long mode)
+{
+	if trmkt015.ut10 < 0	then
+		dal.set.error.message("trmkt0006")
+		|* Negatives not allowed
+		return(false)
+	endif
+	return(true)
+}
+function extern boolean trmkt015.ut20.is.valid(long mode)
+{
+	if trmkt015.ut20 < 0	then
+		dal.set.error.message("trmkt0006")
+		|* Negative not allowed
+		return(false)
+	endif
+	if trmkt015.ut20 < trmkt015.ut10	then
+		dal.set.error.message("trmkt0010")
+		|* Value cannto be less than previous value
+		return(false)
+	endif
+	return(true)
+}
+function extern boolean trmkt015.ut30.is.valid(long mode)
+{
+	if trmkt015.ut30 < 0	then
+		dal.set.error.message("trmkt0006")
+		|* Negative not allowed
+		return(false)
+	endif
+	if trmkt015.ut30 < trmkt015.ut20	then
+		dal.set.error.message("trmkt0010")
+		|* Value cannto be less than previous value
+		return(false)
+	endif
+	return(true)
+}
+function extern boolean trmkt015.mo30.is.valid(long mode)
+{
+	if trmkt015.mo30 < 0	then
+		dal.set.error.message("trmkt0006")
+		|* Negative not allowed
+		return(false)
+	endif
+	if trmkt015.mo30 < trmkt015.ut30	then
+		dal.set.error.message("trmkt0010")
+		|* Value cannto be less than previous value
+		return(false)
+	endif
+	return(true)
+}

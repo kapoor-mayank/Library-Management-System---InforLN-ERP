@@ -1,0 +1,172 @@
+|*******************************************************************************
+|* trmkt030  E60C_1_trng
+|* Resource
+|* mkapoor
+|* 2023-12-13 [07:36]
+|*******************************************************************************
+|* Script Type: DAL
+|*******************************************************************************
+|*	Rev.No. 1  trE60X1trng  13 Dec 23 mkapoor
+|* Script fot Resource
+|*	Rev.No. 2  trE60X1trng  14 Dec 23 mkapoor
+|* Added Index
+|*	Rev.No. 3  trE60X1trng  14 Dec 23 mkapoor
+|* Added Index on Serial Number
+|*	Rev.No. 4  trE60X1trng  18 Dec 23 mkapoor
+|* Added Logic for stopping deletion of Issued Resource
+|*	Rev.No. 5  trE60X1trng  18 Dec 23 mkapoor
+|* Changes In Index
+|*	Rev.No. 6  trE60X1trng  19 Dec 23 mkapoor
+|* Added Logic to add deleted resource to archive
+|*	Rev.No. 7  trE60X1trng  19 Dec 23 mkapoor
+|* Added archive logic in before destroy object
+|*	Rev.No. 8  trE60X1trng  19 Dec 23 mkapoor
+|* Changed dal.update to dal.new
+|*	Rev.No. 9  trE60X1trng  19 Dec 23 mkapoor
+|* Removed for update
+|*	Rev.No. 10  trE60X1trng  19 Dec 23 mkapoor
+|* Changed Archive logic
+|*	Rev.No. 11  trE60X1trng  19 Dec 23 mkapoor
+|* Added Logic for archive
+|*	Rev.No. 12  trE60X1trng  19 Dec 23 mkapoor
+|* Added logic to ad record to other table
+|*	Rev.No. 13  trE60X1trng  19 Dec 23 mkapoor
+|* Chnaged nae of dal
+|*	Rev.No. 14  trE60X1trng  19 Dec 23 mkapoor
+|* Added Logic to update other table
+|*	Rev.No. 15  trE60X1trng  19 Dec 23 mkapoor
+|* Added logic to check for price negatives
+|*	Rev.No. 16  trE60X1trng  19 Dec 23 mkapoor
+|* Added appropriate message
+|*	Rev.No. 17  trE60X1trng  19 Dec 23 mkapoor
+|* Fixed logic
+|*	Rev.No. 18  trE60X1trng  19 Dec 23 mkapoor
+|* changed query - added index and as set with 1 rows
+|*	Rev.No. 19  trE60X1trng  21 Dec 23 mkapoor
+|* Added message
+|*	Rev.No. 20  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from code freeze
+|******************************************************************************
+#ident "@(#)trmkt030  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 20  27 Dec 23  mkapoor"
+                                                                                
+|*************************** declaration section *******************************
+
+#include <bic_dal2>
+table	ttrmkt005		|* Free Number Table
+table	ttrmkt010		|* Resource Master Table
+table	ttrmkt030		|* Resource Table
+table	ttrmkt040		|* Archive
+string	l.resid(6) fixed	|* For Resource ID Numeric Digits
+|*************************** object hooks section ******************************
+
+function extern boolean method.is.allowed(
+			long		i.method)
+{
+	on case i.method
+	case DAL_NEW:
+		break
+	case DAL_UPDATE:
+		break
+	case DAL_DESTROY:
+		break
+	endcase
+	return(true)
+}
+
+function extern long before.open.object.set()
+{
+	dal.field.depends.on("trmkt030.reid", HOOK_UPDATE, "trmkt030.type")
+	return(0)
+}
+
+function extern long before.destroy.object()
+{
+	if trmkt030.aire = trmkt.aire.issued or trmkt030.aire = trmkt.aire.renew then
+		dal.set.error.message("trmkt0005")
+		|* An issued resource cannot be deleted
+		return(DALHOOKERROR)
+	else
+		long retval
+|		select	trmkt040.*
+|		from	trmkt040	for	update
+|		selectdo
+			dal.set.property("trmkt040", ttrmkt040, "trmkt040.name", trmkt030.name, DAL_NEW)
+			dal.set.property("trmkt040", ttrmkt040, "trmkt040.publ", trmkt030.publ, DAL_NEW)
+			dal.set.property("trmkt040", ttrmkt040, "trmkt040.pric", trmkt030.price, DAL_NEW)
+			dal.set.property("trmkt040", ttrmkt040, "trmkt040.rsrc", trmkt030.type, DAL_NEW)
+			dal.new("trmkt040", ttrmkt040, retval, false, db.retry)
+|			trmkt040.publ = trmkt030.publ
+|			trmkt040.pric = trmkt030.price
+|			trmkt040.rsrc = trmkt030.type
+			
+|		endselect
+		return(0)
+	endif
+}
+
+function extern long after.destroy.object()
+{
+	return(0)
+}
+
+function extern long before.save.object(
+			long		i.mode)
+{
+	return(0)
+}
+
+function extern long after.save.object(
+			long		i.mode)
+{
+	long retval
+	if i.mode = DAL_NEW	then
+		select	trmkt005.*
+		from	trmkt005	for update
+		where	trmkt005._index1 = 5
+		selectdo
+			trmkt005.frno = trmkt005.frno + 1
+			dal.update("trmkt005", ttrmkt005, retval, false, db.retry)
+		endselect
+		
+		select	trmkt010.*
+		from	trmkt010	for update
+		where	trmkt010._index1 = :trmkt030.type
+		as set with 1 rows
+		selectdo
+			trmkt010.frno = trmkt010.frno + 1
+			dal.update("trmkt010", ttrmkt010, retval, false, db.retry)
+		endselect
+	endif
+	return(0)
+}
+
+|*************************** field hooks section *******************************
+function extern void trmkt030.reid.update(long mode)
+{
+	if mode = DAL_NEW	then
+		select	trmkt010.*
+		from	trmkt010
+		where	trmkt010._index1 = :trmkt030.type
+		as set with 1 rows
+		selectdo
+			l.resid = str$(trmkt010.frno)
+			l.resid = shiftr$(l.resid)
+			l.resid = str.replace$(l.resid, " ", "0")
+			trmkt030.reid = trmkt010.sers & l.resid
+		endselect
+	endif
+}
+function extern boolean trmkt030.price.is.valid(long mode)
+{
+	if trmkt030.price < 0 or trmkt030.price = 0.0	then
+		dal.set.error.message("trmkt0015")
+		|* Invalid value for price
+		return(false)
+	else
+		return(true)
+	endif
+	return(true)
+}
+|*************************** business methods section *************************
+|*************************** internal functions section ************************
+|*************************** end of DAL source *********************************

@@ -1,0 +1,62 @@
+|*******************************************************************************
+|* trmkt0115s000  E60C_1_trng
+|* Penalty Master Maintain
+|* mkapoor
+|* 2023-12-12 [06:38]
+|*******************************************************************************
+|* Script Type: 123
+|*******************************************************************************
+|*	Rev.No. 9  trE60X1trng  12 Dec 23 mkapoor
+|* Created by LN Studio (Activity mkapoor_009, User mkapoor)
+|*	Rev.No. 10  trE60X1trng  12 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 11  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic to disable fields getting previous values
+|*	Rev.No. 12  trE60X1trng  20 Dec 23 mkapoor
+|* Removed Print button
+|*	Rev.No. 13  trE60X1trng  21 Dec 23 mkapoor
+|* Fix in Indentation
+|*	Rev.No. 14  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from Code Freeze
+|******************************************************************************
+
+|*************************** declaration section *******************************
+declaration:
+#ident "@(#)trmkt0115s000  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 14  27 Dec 23  mkapoor"
+
+table	ttrmkt015	|* Penalty Master
+table	ttrmkt005	|* Free Number Table
+
+|****************************** program section ********************************
+before.new.object:
+	select	trmkt005.*
+	from	trmkt005
+	where	trmkt005.srno = 2
+	as set with 1 rows
+	selectdo
+		trmkt015.srno = trmkt005.frno
+	selectempty
+		message("Something Went Wrong!!!")
+	endselect
+after.form.read:
+	enable.save.on.occ.change()
+|****************************** group section **********************************
+|****************************** field section **********************************
+field.trmkt015.srno:
+after.field:
+	disable.fields("trmkt015.srno")
+field.trmkt015.rsrc:
+before.input:
+	attr.dorp = true
+field.trmkt015.ut10:
+before.input:
+	attr.dorp = true
+field.trmkt015.ut20:
+before.input:
+	attr.dorp = true
+field.trmkt015.ut30:
+before.input:
+	attr.dorp = true
+field.trmkt015.mo30:
+before.input:
+	attr.dorp = true

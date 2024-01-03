@@ -1,0 +1,93 @@
+|*******************************************************************************
+|* trmkt0125m000  E60C_1_trng
+|* Department Maintain
+|* mkapoor
+|* 2023-12-12 [10:52]
+|*******************************************************************************
+|* Script Type: 123
+|*******************************************************************************
+|*	Rev.No. 1  trE60X1trng  13 Dec 23 mkapoor
+|* Created by LN Studio (Activity mkapoor_009, User mkapoor)
+|*	Rev.No. 2  trE60X1trng  13 Dec 23 mkapoor
+|* Added getting 0 logic
+|*	Rev.No. 3  trE60X1trng  13 Dec 23 mkapoor
+|* Added DEP and Free Number concat logic
+|*	Rev.No. 4  trE60X1trng  13 Dec 23 mkapoor
+|* Added Synch Dialog
+|*	Rev.No. 5  trE60X1trng  13 Dec 23 mkapoor
+|* Counting Employees
+|*	Rev.No. 6  trE60X1trng  13 Dec 23 mkapoor
+|* Number of employees
+|*	Rev.No. 7  trE60X1trng  13 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 8  trE60X1trng  13 Dec 23 mkapoor
+|* Query for counting active employees
+|*	Rev.No. 9  trE60X1trng  13 Dec 23 mkapoor
+|* Fixed Field Section
+|*	Rev.No. 10  trE60X1trng  14 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 11  trE60X1trng  14 Dec 23 mkapoor
+|* Fixed Query for Number of Employees
+|*	Rev.No. 12  trE60X1trng  14 Dec 23 mkapoor
+|* Changed No of active resources to display only
+|*	Rev.No. 13  trE60X1trng  14 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 14  trE60X1trng  18 Dec 23 mkapoor
+|* Removed Query to calculate number of employees
+|*	Rev.No. 15  trE60X1trng  19 Dec 23 mkapoor
+|* Removed prevously added table field
+|*	Rev.No. 16  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic to disable fields getting previous values
+|*	Rev.No. 17  trE60X1trng  20 Dec 23 mkapoor
+|* Removed Print button
+|*	Rev.No. 18  trE60X1trng  21 Dec 23 mkapoor
+|* Fix in Indentation
+|*	Rev.No. 19  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from Code Freeze
+|******************************************************************************
+
+|*************************** declaration section *******************************
+declaration:
+#ident "@(#)trmkt0125m000  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 19  27 Dec 23  mkapoor"
+
+table	ttrmkt025		|* Department Master
+table	ttrmkt005		|* Free Number
+string	l.freeno(6) fixed	|* For 6 digit Free Number
+table	ttrmkt020		|* Employee Master
+|long	l.numofemp		|* For storing number of employees
+|****************************** program section ********************************
+before.new.object:
+	select	trmkt005.*
+	from	trmkt005
+	where	trmkt005.srno = 4
+	as set with 1 rows
+	selectdo
+		l.freeno = str$(trmkt005.frno)
+		l.freeno = shiftr$(l.freeno)
+		l.freeno = str.replace$(l.freeno, " ", "0")
+		trmkt025.deptid = "DEP" & l.freeno
+	endselect
+after.form.read:
+	enable.save.on.occ.change()
+|****************************** group section **********************************
+|****************************** field section **********************************
+field.trmkt025.deptid:
+after.field:
+	disable.fields("trmkt025.deptid")
+field.trmkt025.name:
+before.input:
+	attr.dorp = true
+field.trmkt025.status:
+before.input:
+	attr.dorp = true	
+|field.trmkt025.acre:
+|before.display:
+|	select	count(trmkt020.empid):l.numofemp
+|	from	trmkt020
+|	where	trmkt020.dept = {:trmkt025.name} 
+|		and trmkt020.status = trmkt.acna.active
+|	group by	trmkt020.dept	
+|	selectdo
+|		|message(l.numofemp)
+|		trmkt025.acre = l.numofemp
+|	endselect

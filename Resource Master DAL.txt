@@ -1,0 +1,81 @@
+|******************************************************************************
+|* trmkt010  E60C_1_trng
+|* Resource Master
+|* mkapoor
+|* 2023-12-12 [01:33]
+|******************************************************************************
+|* Script Type: DAL
+|******************************************************************************
+|*	Rev.No. 1  trE60X1trng  12 Dec 23 mkapoor
+|* Added Update Logic In DAL
+|*	Rev.No. 2  trE60X1trng  12 Dec 23 mkapoor
+|* Fixed DAL
+|*	Rev.No. 3  trE60X1trng  12 Dec 23 mkapoor
+|* N
+|*	Rev.No. 4  trE60X1trng  12 Dec 23 mkapoor
+|* ADDED UPDATE LOGIC IN DAL
+|*	Rev.No. 5  trE60X1trng  12 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 6  trE60X1trng  14 Dec 23 mkapoor
+|* Added Index on Serial Number
+|*	Rev.No. 7  trE60X1trng  14 Dec 23 mkapoor
+|* Changed No of days to LOng
+|*	Rev.No. 8  trE60X1trng  19 Dec 23 mkapoor
+|* Added check for Valid Issue Days
+|*	Rev.No. 9  trE60X1trng  19 Dec 23 mkapoor
+|* Added DAL2
+|*	Rev.No. 10  trE60X1trng  19 Dec 23 mkapoor
+|* Fixed Logic
+|*	Rev.No. 11  trE60X1trng  19 Dec 23 mkapoor
+|* Changed query to add set with 1 row
+|*	Rev.No. 12  trE60X1trng  19 Dec 23 mkapoor
+|* Added appropriate message
+|*	Rev.No. 13  trE60X1trng  20 Dec 23 mkapoor
+|* Fixed Labels and MMT alignments
+|*	Rev.No. 14  trE60X1trng  21 Dec 23 mkapoor
+|* Added message cotents
+|*	Rev.No. 15  trE60X1trng  21 Dec 23 mkapoor
+|* Changed Valid Issue days logic, max can only be 15 days
+|*	Rev.No. 16  trE60X1trng  27 Dec 23 mkapoor
+|* Added Index on series to make it unique
+|******************************************************************************
+#ident "@(#)trmkt010  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 16  27 Dec 23  mkapoor"
+                                                                                
+#include <bic_dal2>
+table	ttrmkt005	|* Free Numbers
+table	ttrmkt010	|* Resource Master
+function extern long before.open.object.set()
+{
+	return(0)
+}
+
+function extern long before.save.object(long type)
+{
+	return(0)
+}
+
+function extern long after.save.object(long mode)
+{	long	retval
+	if	mode = DAL_NEW	then
+		select	trmkt005.*
+		from	trmkt005	for	update
+		where	trmkt005._index1 = 1
+		as set with 1 rows
+		selectdo
+			trmkt005.frno = trmkt005.frno + 1
+		dal.update("trmkt005", ttrmkt005, retval, false, db.retry)
+		endselect
+	endif
+	return(retval)
+}
+function extern boolean trmkt010.vidt.is.valid(long mode)
+{
+	if trmkt010.vidt < 1 or trmkt010.vidt > 15	then
+		dal.set.error.message("trmkt0016")
+		|* Issue Days can be between 1 - 15
+		return(false)
+	else
+		return(true)
+	endif
+	return(true)
+}

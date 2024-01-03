@@ -1,0 +1,115 @@
+|******************************************************************************
+|* trmkt025  
+|* Department Master
+|* mkapoor
+|* 2023-12-13 [11:28]
+|******************************************************************************
+|* Script Type: DAL
+|*****************************************************************************
+|*	Rev.No. 1  trE60X1trng  13 Dec 23 mkapoor
+|* Added Free Number Update Logic
+|*	Rev.No. 2  trE60X1trng  13 Dec 23 mkapoor
+|* Moved Index on Name on Place 1
+|*	Rev.No. 3  trE60X1trng  13 Dec 23 mkapoor
+|* Changed Index To DEPT ID
+|*	Rev.No. 4  trE60X1trng  14 Dec 23 mkapoor
+|* Fixed Domain
+|*	Rev.No. 5  trE60X1trng  14 Dec 23 mkapoor
+|* Added Index on Serial Number
+|*	Rev.No. 6  trE60X1trng  14 Dec 23 mkapoor
+|* Chnaged Index
+|*	Rev.No. 7  trE60X1trng  14 Dec 23 mkapoor
+|* Changed Index
+|*	Rev.No. 8  trE60X1trng  18 Dec 23 mkapoor
+|* Added Query in DAL
+|*	Rev.No. 9  trE60X1trng  18 Dec 23 mkapoor
+|* Changed section to is derived
+|*	Rev.No. 10  trE60X1trng  19 Dec 23 mkapoor
+|* Removed logic to calculate number of employees
+|*	Rev.No. 11  trE60X1trng  19 Dec 23 mkapoor
+|* Added logic to prevent department disable if employee active
+|*	Rev.No. 12  trE60X1trng  19 Dec 23 mkapoor
+|* Changed is valid to check
+|*	Rev.No. 13  trE60X1trng  19 Dec 23 mkapoor
+|* Added appropiate message on setting inactive dept
+|*	Rev.No. 14  trE60X1trng  19 Dec 23 mkapoor
+|* Added index in query
+|*	Rev.No. 15  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic to stop deletion of active department
+|*	Rev.No. 16  trE60X1trng  21 Dec 23 mkapoor
+|* Added comment
+|*	Rev.No. 17  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from code freeze
+|******************************************************************************
+#ident "@(#)trmkt025  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 17  27 Dec 23  mkapoor"
+                                                                                
+#include <bic_dal>
+table	ttrmkt005	|* Free Number
+table	ttrmkt020	|* Employees
+table	ttrmkt025	|* Department
+long	l.numofemp	|* For storing number of employees
+function extern long before.open.object.set()
+{
+|	dal.field.depends.on("trmkt025.acre", HOOK_UPDATE, "trmkt025.deptid")
+	return(0)
+}
+
+function extern long before.save.object(long type)
+{
+	return(0)
+}
+function extern long after.save.object(long mode)
+{	long	retval
+	if	mode = DAL_NEW	then
+		select	trmkt005.*
+		from	trmkt005	for	update
+		where	trmkt005._index1 = 4
+		as set with 1 rows
+		selectdo
+			trmkt005.frno = trmkt005.frno + 1
+		dal.update("trmkt005", ttrmkt005, retval, false, db.retry)
+		endselect
+	endif
+	return(retval)
+}
+function extern long before.destroy.object()
+{
+	if trmkt025.status = trmkt.acna.active	then
+		dal.set.error.message("trmkt0021")
+		|* Active department cannot be deleted
+		return(DALHOOKERROR)
+	endif
+	return(0)
+}
+|function extern boolean trmkt025.acre.is.derived()
+|{
+|	select	count(trmkt020.empid):l.numofemp
+|	from	trmkt020
+|	where	trmkt020.dept = {:trmkt025.name} 
+|		and trmkt020.status = trmkt.acna.active
+|	group by	trmkt020.dept	
+|	selectdo
+|		trmkt025.acre = l.numofemp
+|	endselect
+|	return(true)
+|}
+function extern long trmkt025.status.check(long mode)
+{
+	if trmkt025.status = trmkt.acna.notactive	then
+		select	trmkt020.*
+		from	trmkt020
+		where	trmkt020._index2 = :trmkt025.name and
+			trmkt020.status = trmkt.acna.active
+		selectdo
+			dal.set.error.message("trmkt0012")
+			|* Department has active employees, cannot be set
+			|* inactive
+			return(DALHOOKERROR)
+		selectempty
+			return(0)
+		endselect
+	else
+		return(0)
+	endif
+	return(0)
+}

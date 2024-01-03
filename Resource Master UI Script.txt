@@ -1,0 +1,88 @@
+|*******************************************************************************
+|* trmkt0110s000  E60C_1_trng
+|* Resource Master Maintain
+|* mkapoor
+|* 2023-12-12 [10:50]
+|*******************************************************************************
+|* Script Type: 123
+|******************************************************************************
+|*	Rev.No. 1  trE60X1trng  12 Dec 23 mkapoor
+|* Created Resource Master Sub and Main Sessions
+|*	Rev.No. 2  trE60X1trng  12 Dec 23 mkapoor
+|* Program Script for Auto Generate
+|*	Rev.No. 3  trE60X1trng  12 Dec 23 mkapoor
+|* n
+|*	Rev.No. 3  trE60X1trng  12 Dec 23 mkapoor
+|* Added Logic for Auto Increment of Free Number Table
+|*	Rev.No. 5  trE60X1trng  12 Dec 23 mkapoor
+|* N
+|*	Rev.No. 6  trE60X1trng  12 Dec 23 mkapoor
+|* Fixed Auto Generate Logic for Serial Number
+|*	Rev.No. 7  trE60X1trng  12 Dec 23 mkapoor
+|* Fixed Updation On Deletion
+|*	Rev.No. 8  trE60X1trng  12 Dec 23 mkapoor
+|* Disabled Serial Number Field
+|*	Rev.No. 9  trE60X1trng  12 Dec 23 mkapoor
+|* FIxed Update Logic
+|*	Rev.No. 10  trE60X1trng  12 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 11  trE60X1trng  12 Dec 23 mkapoor
+|* Fixed Update Logic
+|*	Rev.No. 12  trE60X1trng  12 Dec 23 mkapoor
+|* REMOVED FREE NUMBER TABLE UPDATE LOGIC
+|*	Rev.No. 13  trE60X1trng  12 Dec 23 mkapoor
+|* Disabled Field
+|*	Rev.No. 15  trE60X1trng  12 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 16  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic to disable fields getting previous values
+|*	Rev.No. 17  trE60X1trng  20 Dec 23 mkapoor
+|* Fixed command set
+|*	Rev.No. 18  trE60X1trng  21 Dec 23 mkapoor
+|* Fixes in indentation
+|*	Rev.No. 19  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from Code Freeze
+|******************************************************************************
+
+|*************************** declaration section *******************************
+declaration:
+#ident "@(#)trmkt0110s000  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 19  27 Dec 23  mkapoor"
+
+table	ttrmkt010 								|* Resource Master
+table	ttrmkt005								|* Free Number
+extern	domain	trmkt.srno	g.freeno					|* For Storing FreeNumber
+|****************************** program section ********************************
+
+before.new.object:
+	select	trmkt005.*
+	from	trmkt005
+	where	trmkt005.srno = 1
+	as set with 1 rows
+	selectdo
+		trmkt010.srno = trmkt005.frno
+	selectempty
+		message("Something Went Wrong!!!")
+	endselect
+after.form.read:
+enable.save.on.occ.change()	
+|****************************** field sections **********************************
+field.trmkt010.srno:
+after.field:
+	disable.fields("trmkt010.srno")
+field.trmkt010.rsrc:
+before.input:
+	attr.dorp = true
+field.trmkt010.sers:
+before.input:
+	attr.dorp = true
+field.trmkt010.frno:
+before.input:
+	attr.dorp = true
+field.trmkt010.vidt:
+before.input:
+	attr.dorp = true
+field.trmkt010.ptyp:
+before.input:
+	attr.dorp = true
+|****************************** group section **********************************
+

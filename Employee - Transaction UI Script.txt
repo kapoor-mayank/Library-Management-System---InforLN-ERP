@@ -1,0 +1,88 @@
+|*******************************************************************************
+|* trmkt0620m000  E60C_1_trng
+|* Employee Transaction MMT
+|* mkapoor
+|* 2023-12-16 [02:56]
+|*******************************************************************************
+|* Script Type: 123
+|*******************************************************************************
+|*	Rev.No. 1  trE60X1trng  16 Dec 23 mkapoor
+|* Created by LN Studio (Activity mkapoor_009, User mkapoor)
+|*	Rev.No. 2  trE60X1trng  18 Dec 23 mkapoor
+|* Added Logic for Auto Generate CODE
+|*	Rev.No. 3  trE60X1trng  18 Dec 23 mkapoor
+|* Changed Type of Session
+|*	Rev.No. 4  trE60X1trng  18 Dec 23 mkapoor
+|* Changed Index
+|*	Rev.No. 5  trE60X1trng  18 Dec 23 mkapoor
+|* Change in Index
+|*	Rev.No. 6  trE60X1trng  18 Dec 23 mkapoor
+|* Chnages in Index
+|*	Rev.No. 8  trE60X1trng  18 Dec 23 mkapoor
+|* Changes In Index
+|*	Rev.No. 9  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in index
+|*	Rev.No. 10  trE60X1trng  18 Dec 23 mkapoor
+|* Changes In Index
+|*	Rev.No. 11  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in index
+|*	Rev.No. 12  trE60X1trng  18 Dec 23 mkapoor
+|* Fixed single Mark
+|*	Rev.No. 13  trE60X1trng  20 Dec 23 mkapoor
+|* Fix in alignment of fields in MMT
+|*	Rev.No. 14  trE60X1trng  20 Dec 23 mkapoor
+|* Fixed Alignment of fields in MMT
+|*	Rev.No. 15  trE60X1trng  20 Dec 23 mkapoor
+|* Fixed Labels and MMT alignments
+|*	Rev.No. 16  trE60X1trng  20 Dec 23 mkapoor
+|* Removed Print button
+|*	Rev.No. 17  trE60X1trng  20 Dec 23 mkapoor
+|* Removed Print command
+|*	Rev.No. 18  trE60X1trng  21 Dec 23 mkapoor
+|* Added zoom button and linked print session to it
+|*	Rev.No. 19  trE60X1trng  21 Dec 23 mkapoor
+|* Added Zoom in appropiate sessions
+|*	Rev.No. 20  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from Code Freeze
+|*	Rev.No. 21  trE60X1trng  27 Dec 23 mkapoor
+|* Added business method
+|*	Rev.No. 22  trE60X1trng  27 Dec 23 mkapoor
+|* Added form commands
+|******************************************************************************
+
+|*************************** declaration section *******************************
+declaration:
+#ident "@(#)trmkt0620m000  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 22  27 Dec 23  mkapoor"
+#include <bic_dam>
+	table	ttrmkt020		|* Employee Master
+	table	ttrmkt005		|* Free Number
+	string	l.freeno(6) fixed	|* For Free Number
+
+|****************************** program section ********************************
+before.new.object:
+	select	trmkt005.*
+	from	trmkt005
+	where	trmkt005._index1 = 3
+	as set with 1 rows
+	selectdo
+		l.freeno = str$(trmkt005.frno)
+		l.freeno = shiftr$(l.freeno)
+		l.freeno = str.replace$(l.freeno, " ", "0")
+		trmkt020.empid = "EMP" & l.freeno
+	endselect
+
+|****************************** group section **********************************
+
+choice.print.data:
+before.choice:
+	start.session(MODAL, "trmkt0420m000", "", "")
+
+|functions:
+
+|function extern renew()
+|{
+|	long retval
+|	|* TODO: Write code for function renew.resource
+|	dal.start.business.method("trmkt035", "renew.resource", retval)
+|	message(retval)
+|}

@@ -1,0 +1,94 @@
+|*******************************************************************************
+|* trmkt0120s000  E60C_1_trng
+|* Employee Master Maintain
+|* mkapoor
+|* 2023-12-12 [08:09]
+|******************************************************************************
+|* Script Type: 123
+|*******************************************************************************
+|*	Rev.No. 1  trE60X1trng  12 Dec 23 mkapoor
+|* Created by LN Studio (Activity mkapoor_009, User mkapoor)
+|*	Rev.No. 2  trE60X1trng  13 Dec 23 mkapoor
+|* Added Zoom to Countries
+|*	Rev.No. 3  trE60X1trng  13 Dec 23 mkapoor
+|* Added Zoom to Country and Department
+|*	Rev.No. 4  trE60X1trng  13 Dec 23 mkapoor
+|* Changed Mobile Number Domain
+|*	Rev.No. 5  trE60X1trng  13 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 6  trE60X1trng  14 Dec 23 mkapoor
+|* Added Form Fields
+|*	Rev.No. 7  trE60X1trng  14 Dec 23 mkapoor
+|* Added Zoom in Department and Country
+|*	Rev.No. 9  trE60X1trng  14 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 10  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic to disable fields getting previous values
+|*	Rev.No. 11  trE60X1trng  20 Dec 23 mkapoor
+|* Removed Print button
+|*	Rev.No. 12  trE60X1trng  21 Dec 23 mkapoor
+|* Fix in Indentation
+|*	Rev.No. 13  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from Code Freeze
+|******************************************************************************
+
+|*************************** declaration section *******************************
+declaration:
+#ident "@(#)trmkt0120s000  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 13  27 Dec 23  mkapoor"
+
+table	ttrmkt020		|* Employee Master
+table	ttrmkt005		|* Free Number
+string	l.freeno(6) fixed	|* For Free Number
+
+|****************************** program section ********************************
+before.new.object:
+	select	trmkt005.*
+	from	trmkt005
+	where	trmkt005.srno = 3
+	as set with 1 rows
+	selectdo
+		l.freeno = str$(trmkt005.frno)
+		l.freeno = shiftr$(l.freeno)
+		l.freeno = str.replace$(l.freeno, " ", "0")
+		trmkt020.empid = "EMP" & l.freeno
+	endselect
+after.form.read:
+	enable.save.on.occ.change()
+|****************************** group section **********************************
+|****************************** field section **********************************
+field.trmkt020.empid:
+after.field:
+	disable.fields("trmkt020.empid")
+field.trmkt020.code:
+before.input:
+	attr.dorp = true
+field.trmkt020.name:
+before.input:
+	attr.dorp = true
+field.trmkt020.dept:
+before.input:
+	attr.dorp = true
+field.trmkt020.desig:
+before.input:
+	attr.dorp = true
+field.trmkt020.mobno:
+before.input:
+	attr.dorp = true
+field.trmkt020.city:
+before.input:	
+	attr.dorp = true
+field.trmkt020.state:
+before.input:
+	attr.dorp = true
+field.trmkt020.cntry:
+before.input:
+	attr.dorp = true
+field.trmkt020.zipc:
+before.input:
+	attr.dorp = true
+field.trmkt020.dob:
+before.input:
+	attr.dorp = true
+field.trmkt020.status:
+before.input:
+	attr.dorp = true

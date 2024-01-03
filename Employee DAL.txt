@@ -1,0 +1,157 @@
+|******************************************************************************
+|* trmkt020  E60C_1_trng
+|* Employee Master
+|* mkapoor
+|* 2023-12-13 [12:01]
+|******************************************************************************
+|* Script Type: DAL
+|******************************************************************************
+|*	Rev.No. 1  trE60X1trng  13 Dec 23 mkapoor
+|* Added Index on code and made it unique
+|*	Rev.No. 2  trE60X1trng  13 Dec 23 mkapoor
+|* Changed Domain for Designation
+|*	Rev.No. 3  trE60X1trng  13 Dec 23 mkapoor
+|* Changed Mobile Number Domain
+|*	Rev.No. 4  trE60X1trng  14 Dec 23 mkapoor
+|* Domain Change
+|*	Rev.No. 5  trE60X1trng  14 Dec 23 mkapoor
+|* Added Index on Serial Number
+|*	Rev.No. 6  trE60X1trng  14 Dec 23 mkapoor
+|* Changed Index
+|*	Rev.No. 7  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in Index for MMT
+|*	Rev.No. 8  trE60X1trng  19 Dec 23 mkapoor
+|* Added logic to checck for transactions before setting employee as inactive
+|*	Rev.No. 9  trE60X1trng  19 Dec 23 mkapoor
+|* Added check for mobile number
+|*	Rev.No. 11  trE60X1trng  19 Dec 23 mkapoor
+|* Changes in mobile number logic
+|*	Rev.No. 12  trE60X1trng  19 Dec 23 mkapoor
+|* Changed is valid to check
+|*	Rev.No. 13  trE60X1trng  19 Dec 23 mkapoor
+|* Changes in mobile number logic
+|*	Rev.No. 14  trE60X1trng  19 Dec 23 mkapoor
+|* Changed check to is valid
+|*	Rev.No. 15  trE60X1trng  19 Dec 23 mkapoor
+|* Changed is valid to check
+|*	Rev.No. 16  trE60X1trng  19 Dec 23 mkapoor
+|* Added Logic for checking 18 years of age
+|*	Rev.No. 17  trE60X1trng  19 Dec 23 mkapoor
+|* Changes inlogic for calculating minimum 18 years of age
+|*	Rev.No. 18  trE60X1trng  19 Dec 23 mkapoor
+|* Changed DOB LOGIC
+|*	Rev.No. 19  trE60X1trng  19 Dec 23 mkapoor
+|* Added logic to check for inactive department while adding new employee
+|*	Rev.No. 20  trE60X1trng  19 Dec 23 mkapoor
+|* Removed DOB Check
+|*	Rev.No. 21  trE60X1trng  19 Dec 23 mkapoor
+|* Chnaged is valid to check for department
+|*	Rev.No. 22  trE60X1trng  19 Dec 23 mkapoor
+|* Added accurate message
+|*	Rev.No. 23  trE60X1trng  19 Dec 23 mkapoor
+|* Changed check to is valid
+|*	Rev.No. 24  trE60X1trng  19 Dec 23 mkapoor
+|* Fixed Logic
+|*	Rev.No. 25  trE60X1trng  19 Dec 23 mkapoor
+|* Added index in query
+|*	Rev.No. 26  trE60X1trng  19 Dec 23 mkapoor
+|* Added logic to stop deletion of active employee
+|*	Rev.No. 27  trE60X1trng  21 Dec 23 mkapoor
+|* Added message comments
+|*	Rev.No. 28  trE60X1trng  21 Dec 23 mkapoor
+|* Fix in department check
+|*	Rev.No. 29  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from code freeze
+|******************************************************************************
+#ident "@(#)trmkt020  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 29  27 Dec 23  mkapoor"
+                                                                                
+#include <bic_dal2>
+table	ttrmkt005	|* Free Number Table
+table	ttrmkt020	|* Employee Master
+table	ttrmkt025	|* Department Master
+table	ttrmkt035	|* Transactions
+function extern long before.open.object.set()
+{
+	return(0)
+}
+
+function extern long before.save.object(long type)
+{
+	return(0)
+}
+function extern long after.save.object(long mode)
+{	long	retval
+	if	mode = DAL_NEW	then
+		select	trmkt005.*
+		from	trmkt005	for	update
+		where	trmkt005._index1 = 3
+		as set with 1 rows
+		selectdo
+			trmkt005.frno = trmkt005.frno + 1
+		dal.update("trmkt005", ttrmkt005, retval, false, db.retry)
+		endselect
+	endif
+	return(retval)
+}
+function extern long before.destroy.object()
+{
+	if trmkt020.status = trmkt.acna.active	then
+		dal.set.error.message("trmkt0019")
+		|* Active employee cannot be deleted
+		return(DALHOOKERROR)
+	endif
+	return(0)
+}
+function extern long trmkt020.status.check(long mode)
+{
+	if trmkt020.status = trmkt.acna.notactive	then
+		select	trmkt035.*
+		from	trmkt035
+		where	trmkt035._index3 = :trmkt020.empid and trmkt035.status <> trmkt.irre.return
+		selectdo
+			dal.set.error.message("trmkt0009")
+			|* Employee has pending transaction, cannot se set
+			|* inactive
+			return(DALHOOKERROR)
+		selectempty
+			return(0)
+		endselect
+	endif
+	return(0)
+}
+
+function extern long trmkt020.mobno.check(long mode)
+{
+	if (NOT isspace(trmkt020.mobno)) and (NOT isdigit(trmkt020.mobno))
+		and len(strip$(trmkt020.mobno)) <> 10	then
+		dal.set.error.message("trmkt0011")
+		|* Invalid Mobile Number
+		return(DALHOOKERROR)
+	endif
+	return(0)
+}
+|function extern long trmkt020.dob.check(long mode)
+|{
+|	if trmkt020.dob > (date.num() - (18 * 365))	then
+|		dal.set.error.message("trmkt0011")
+|		return(DALHOOKERROR)
+|	endif
+|	return(0)
+|}
+function extern boolean trmkt020.dept.check(long mode)
+{
+
+	select	trmkt025.*
+	from	trmkt025
+	where	trmkt025._index1 = :trmkt020.dept
+	selectdo
+		if trmkt025.status = trmkt.acna.notactive	then
+			dal.set.error.message("trmkt0014")
+			|*Select department which is active
+			return(DALHOOKERROR)
+		else
+			return(0)
+		endif
+	endselect
+	return(0)
+}

@@ -1,0 +1,97 @@
+|*******************************************************************************
+|* trmkt0420m000  E60C_1_trng
+|* Employee Print Session
+|* mkapoor
+|* 2023-12-17 [11:06]
+|*******************************************************************************
+|* Script Type: 123
+|*******************************************************************************
+|*	Rev.No. 1  trE60X1trng  17 Dec 23 mkapoor
+|* Created by LN Studio (Activity mkapoor_009, User mkapoor)
+|*	Rev.No. 9  trE60X1trng  17 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 10  trE60X1trng  17 Dec 23 mkapoor
+|* Linked Report
+|*	Rev.No. 29  trE60X1trng  17 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 30  trE60X1trng  18 Dec 23 mkapoor
+|* Date From changes
+|*	Rev.No. 31  trE60X1trng  20 Dec 23 mkapoor
+|* Removed Print button
+|*	Rev.No. 32  trE60X1trng  20 Dec 23 mkapoor
+|* Added default min and max values code
+|*	Rev.No. 33  trE60X1trng  21 Dec 23 mkapoor
+|* Fix in indentation
+|*	Rev.No. 34  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from Code Freeze
+|*******************************************************************************
+
+|*************************** declaration section *******************************
+declaration:
+#ident "@(#)trmkt0420m000  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 34  27 Dec 23  mkapoor"
+
+table	ttrmkt035				|* Transactions
+extern	domain	trmkt.rsrc	empid.f		|*EMP ID FROM
+extern	domain	trmkt.rsrc	empid.t		|*EMP ID TO
+extern	domain	trmkt.date	date.f		|*DATE FROM
+extern	domain	trmkt.date	date.t		|*DATE TO
+|extern	domain	trmkt.pric	pena.total
+|****************************** program section ********************************
+
+
+|****************************** group section **********************************
+
+group.1:
+init.group:
+	get.screen.defaults()
+	set.min(empid.f, "trmkt.rsrc")
+	set.min(date.f, "trmkt.date")
+	set.max(empid.t, "trmkt.rsrc")
+	set.max(date.t, "trmkt.date")
+|****************************** choice section ********************************
+
+choice.cont.process:
+on.choice:
+	execute(print.data)
+
+choice.print.data:
+on.choice:
+	if rprt_open() then
+		read.main.table()
+		rprt_close()
+	else
+		choice.again()
+	endif
+
+
+|****************************** field section *********************************
+field.empid.f:
+when.field.changes:
+	empid.t = empid.f
+
+field.date.t:
+before.display:
+	date.t = utc.num()	|	Local Date
+
+|****************************** function section *******************************
+
+functions:
+
+function read.main.table()
+{
+	select	trmkt035.*
+	from	trmkt035
+	where	trmkt035.empid inrange {:empid.f} and {:empid.t}
+		and trmkt035.isdt inrange {:date.f} and {:date.t}
+	selectdo
+		select	trmkt020.*
+		from	trmkt020
+		where	trmkt020.empid = :trmkt035.empid
+		selectdo
+			rprt_send()
+		selecteos
+		endselect
+|		pena.total = pena.total + trmkt035.amtr
+	endselect
+	
+}

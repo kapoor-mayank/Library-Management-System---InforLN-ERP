@@ -1,0 +1,183 @@
+|*******************************************************************************
+|* trmkt0135m000  E60C_1_trng
+|* Transaction Maintain
+|* mkapoor
+|* 2023-12-12 [10:59]
+|*******************************************************************************
+|* Script Type: 123
+|*******************************************************************************
+|*	Rev.No. 1  trE60X1trng  13 Dec 23 mkapoor
+|* Created by LN Studio (Activity mkapoor_009, User mkapoor)
+|*	Rev.No. 2  trE60X1trng  14 Dec 23 mkapoor
+|* DATE LOGIC
+|*	Rev.No. 4  trE60X1trng  14 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 5  trE60X1trng  15 Dec 23 mkapoor
+|* Changed Penalty to Display
+|*	Rev.No. 6  trE60X1trng  16 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 7  trE60X1trng  16 Dec 23 mkapoor
+|* Added Logic for zooming only to specified resource type
+|*	Rev.No. 15  trE60X1trng  16 Dec 23 mkapoor
+|* MK
+|*	Rev.No. 16  trE60X1trng  18 Dec 23 mkapoor
+|* Changes In Index
+|*	Rev.No. 17  trE60X1trng  18 Dec 23 mkapoor
+|* Chnages in INdex
+|*	Rev.No. 18  trE60X1trng  18 Dec 23 mkapoor
+|* Index Change
+|*	Rev.No. 19  trE60X1trng  18 Dec 23 mkapoor
+|* Chnages in Index
+|*	Rev.No. 21  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in Index
+|*	Rev.No. 23  trE60X1trng  18 Dec 23 mkapoor
+|* Changes In Index
+|*	Rev.No. 24  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in index
+|*	Rev.No. 25  trE60X1trng  18 Dec 23 mkapoor
+|* Chnaged INDEX
+|*	Rev.No. 26  trE60X1trng  18 Dec 23 mkapoor
+|* Changes in date auto generate logic
+|*	Rev.No. 27  trE60X1trng  18 Dec 23 mkapoor
+|* Removed Issue Date Disable logic
+|*	Rev.No. 28  trE60X1trng  19 Dec 23 mkapoor
+|* Added query to fetch resource name based on resource ID
+|*	Rev.No. 29  trE60X1trng  20 Dec 23 mkapoor
+|* Added extended return date column in session
+|*	Rev.No. 30  trE60X1trng  20 Dec 23 mkapoor
+|* Added Zoom sessions
+|*	Rev.No. 31  trE60X1trng  20 Dec 23 mkapoor
+|* Disabled fields and logic to check for inactive employee being issued a
+|* resource
+|*	Rev.No. 32  trE60X1trng  20 Dec 23 mkapoor
+|* Fixed Position of Status Column
+|*	Rev.No. 33  trE60X1trng  20 Dec 23 mkapoor
+|* Added save on occurance change
+|*	Rev.No. 34  trE60X1trng  20 Dec 23 mkapoor
+|* Added attr.dorp to stop previous rows values
+|*	Rev.No. 35  trE60X1trng  20 Dec 23 mkapoor
+|* Changed section for disabling reading previous values
+|*	Rev.No. 36  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic to stop getting previous values
+|*	Rev.No. 37  trE60X1trng  20 Dec 23 mkapoor
+|* Added logic to stop defaulting previous values
+|*	Rev.No. 38  trE60X1trng  20 Dec 23 mkapoor
+|* Added form commands
+|*	Rev.No. 39  trE60X1trng  20 Dec 23 mkapoor
+|* Added Sub Session
+|*	Rev.No. 40  trE60X1trng  20 Dec 23 mkapoor
+|* Removed Print button
+|*	Rev.No. 41  trE60X1trng  21 Dec 23 mkapoor
+|* Fix in Indentation
+|*	Rev.No. 42  trE60X1trng  27 Dec 23 mkapoor
+|* Recovered from Code Freeze
+|*	Rev.No. 43  trE60X1trng  27 Dec 23 mkapoor
+|* Added form command for return
+|******************************************************************************
+
+|*************************** declaration section *******************************
+declaration:
+#ident "@(#)trmkt0135m000  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 43  27 Dec 23  mkapoor"
+table	ttrmkt030					|* Resources
+table	ttrmkt035					|* Transaction
+table	ttrmkt005					|* Free Number
+table	ttrmkt010					|* Resource Master
+extern	domain	trmkt.dscr	resource.name		|*For getting name of resources
+#include <bic_dam>
+|****************************** program section ********************************
+before.program:
+|	message(prog.name$)
+	
+before.new.object:
+|	select	trmkt005.*
+|	from	trmkt005
+|	where	trmkt005.srno = 6
+|	as set with 1 rows
+|	selectdo
+|		trmkt035.srno = trmkt005.frno
+|	selectempty
+|		message("Something Went Wrong!!!")
+|	endselect
+	
+	
+	
+|****************************** group section **********************************
+
+|****************************** field section **********************************
+field.trmkt035.srno:
+after.field:
+	disable.fields("trmkt035.srno")
+	
+field.trmkt035.reid:
+before.input:
+	attr.dorp = true
+selection.filter:
+	query.extend.where.in.zoom("trmkt030.type="&quoted.string(trmkt035.rsrc))
+|before.zoom:
+|	g.resource.out = trmkt035.rsrc
+|	export("g.resource.out", g.resource.out)
+|	message(g.resource.out)
+
+field.trmkt035.empid:
+before.input:
+	attr.dorp = true
+	
+field.trmkt035.rsrc:
+before.input:
+	attr.dorp = true
+	
+field.trmkt035.isdt:
+before.input:
+	attr.dorp = true
+	
+field.trmkt035.amtr:
+before.input:
+	attr.dorp = true
+
+field.trmkt035.status:
+|when.field.changes:
+|	refresh.total.line()
+
+field.resource.name:
+before.display:
+	select	trmkt030.*
+	from	trmkt030
+	where	trmkt030._index1 = :trmkt035.reid
+	selectdo
+		resource.name = trmkt030.name
+	selectempty
+	endselect
+
+after.form.read:
+	enable.save.on.occ.change()
+
+
+functions:
+
+function extern return.res()
+{
+	long retval
+	if trmkt035.acdt < trmkt035.isdt then
+		mess("trmkt0025", 1, 2)
+	else
+		dal.start.business.method("trmkt035", "return.resource", retval)
+		commit.transaction()
+	endif
+	if retval <> 0 then
+		mess("trmkt03501", 1, 2)
+	endif
+}
+
+function extern renew()
+{
+	long retval
+	if trmkt035.status <> trmkt.irre.issued then
+		mess("trmkt0024", 1, 2)
+	else
+		dal.start.business.method("trmkt035", "renew.resource", retval)
+|		commit.transaction()
+	endif
+	if retval <> 0 then
+		mess("trmkt03502", 1, 2)
+	endif
+}
