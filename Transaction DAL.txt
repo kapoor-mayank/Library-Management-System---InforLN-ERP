@@ -108,28 +108,29 @@
 |* Added Business Method
 |*	Rev.No. 89  trE60X1trng  27 Dec 23 mkapoor
 |* Removed extended return date column
+|*	Rev.No. 90  trE60X1trng  04 Jan 24 mkapoor
+|* Added logic for adding new record while renewing
 |*******************************************************************************
-#ident "@(#)trmkt035  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 89  27 Dec 23  mkapoor"
+#ident "@(#)trmkt035  trE60X1trng  EETAZ1-XDEV-TRG  Rev.No. 90  04 Jan 24  mkapoor"
                                                                                 
 |*************************** declaration section *******************************
-
-#include <bic_dal2>
 table	ttrmkt005	|* Free Numbers
 table	ttrmkt010	|* Resource Master
-table	ttrmkt030	|* Resources
-table	ttrmkt035	|* Transaction
 table	ttrmkt015	|* Penalty Master
 table	ttrmkt020	|* Employee Master
+table	ttrmkt030	|* Resources
+table	ttrmkt035	|* Transaction
+
 long	l.numofdays	|* For Storing Number of days to be added or subtracted from date
 double	penalty10	|* For storing the penalty to be applied
 double	penalty20	|* For storing the penalty to be applied
 double	penalty30	|* For storing the penalty to be applied
 double	penaltymo	|* For storing the penalty to be applied
 domain	trmkt.srno	serial
+#include <bic_dal2>
 |*************************** object hooks section *****************************
 
-function extern boolean method.is.allowed(
-			long		i.method)
+function extern boolean method.is.allowed(long i.method)
 {
 	on case i.method
 	case DAL_NEW:
@@ -186,8 +187,7 @@ function extern long after.destroy.object()
 	return(0)
 }
 
-function extern long before.save.object(
-			long		i.mode)
+function extern long before.save.object(long i.mode)
 {
 	return(0)
 }
@@ -195,9 +195,9 @@ function extern long before.save.object(
 function extern long after.save.object(long i.mode)
 {
 	long	retval
-	if	i.mode = DAL_NEW	then
+	if	i.mode = DAL_NEW then
 		select	trmkt005.*
-		from	trmkt005	for	update
+		from	trmkt005 for update
 		where	trmkt005._index1 = 6
 		as set with 1 rows
 		selectdo
@@ -206,7 +206,7 @@ function extern long after.save.object(long i.mode)
 		endselect
 		
 		select	trmkt030.*
-		from	trmkt030	for	update
+		from	trmkt030 for update
 		where	trmkt030._index1 = :trmkt035.reid
 		as set with 1 rows
 		selectdo
@@ -215,9 +215,9 @@ function extern long after.save.object(long i.mode)
 		endselect
 	endif
 	
-	if	i.mode = DAL_UPDATE and	trmkt035.status = trmkt.irre.return	then
+	if	i.mode = DAL_UPDATE and	trmkt035.status = trmkt.irre.return then
 		select	trmkt030.*
-		from	trmkt030	for	update
+		from	trmkt030 for update
 		where	trmkt030._index1 = :trmkt035.reid
 		as set with 1 rows
 		selectdo
@@ -226,9 +226,9 @@ function extern long after.save.object(long i.mode)
 		endselect
 	endif
 	
-	if	i.mode = DAL_UPDATE and	trmkt035.status = trmkt.irre.renew	then
+	if	i.mode = DAL_UPDATE and	trmkt035.status = trmkt.irre.renew then
 		select	trmkt030.*
-		from	trmkt030	for	update
+		from	trmkt030 for update
 		where	trmkt030._index1 = :trmkt035.reid
 		as set with 1 rows
 		selectdo
@@ -277,12 +277,12 @@ function extern void trmkt035.pena.update(long mode)
 |	else
 		l.numofdays = trmkt035.acdt - trmkt035.pldt
 |	endif
-	if l.numofdays > 0	then
+	if l.numofdays > 0 then
 		select	trmkt010.*
 		from	trmkt010
 		where	trmkt010.rsrc = :trmkt035.rsrc
 		selectdo
-			if trmkt010.ptyp = trmkt.ptyp.fixed	then
+			if trmkt010.ptyp = trmkt.ptyp.fixed then
 				select	trmkt030.*
 				from	trmkt030
 				where	trmkt030.reid = :trmkt035.reid
@@ -308,19 +308,24 @@ function extern void trmkt035.pena.update(long mode)
 				if l.numofdays > 10 and l.numofdays < 21 then
 					long	l.numgt10
 					l.numgt10 = l.numofdays - 10
-					trmkt035.pena = (penalty10 * 10) + (penalty20 * l.numgt10)
+					trmkt035.pena = (penalty10 * 10) +
+							(penalty20 * l.numgt10)
 				endif
 				if l.numofdays > 20 and l.numofdays < 31 then
 					long	l.numgt20
 					l.numgt20 = l.numofdays - 20
-					trmkt035.pena = (penalty10 * 10) + (penalty20 * 10) + (penalty30 * l.numgt20)
+					trmkt035.pena = (penalty10 * 10) +
+							(penalty20 * 10) +
+							(penalty30 * l.numgt20)
 				endif
 				if l.numofdays > 30	then
 					long	l.numgt30
 					l.numgt30 = l.numofdays - 30
-					trmkt035.pena = (penalty10 * 10) + (penalty20 * 10) + (penalty30 * 10) + (penaltymo * l.numgt30)
+					trmkt035.pena = (penalty10 * 10) +
+							(penalty20 * 10) +
+							(penalty30 * 10) +
+							(penaltymo * l.numgt30)
 				endif
-		
 			endif
 		endselect
 	else
@@ -419,14 +424,14 @@ function extern void trmkt035.pena.update(long mode)
 |}
 function extern boolean trmkt035.reid.is.valid(long mode) 
 {
-	if trmkt035.status = trmkt.irre.issued and mode = DAL_NEW	then
+	if trmkt035.status = trmkt.irre.issued and mode = DAL_NEW then
 		select	trmkt030.*
 		from	trmkt030
 		where	trmkt030._index1 = :trmkt035.reid
 		and	trmkt030._index3 = :trmkt035.rsrc
 		as set with 1 rows
 		selectdo
-			if trmkt030.aire <> trmkt.aire.available	then
+			if trmkt030.aire <> trmkt.aire.available then
 				dal.set.error.message("trmkt03504")
 				|* Please select a resource with status as
 				|* available
@@ -444,7 +449,8 @@ function extern boolean trmkt035.reid.is.valid(long mode)
 					where	trmkt010._index1 = :trmkt035.rsrc
 					as set with 1 rows
 					selectdo
-						if trmkt010.ptyp = trmkt.ptyp.fixed then
+						if trmkt010.ptyp =
+						   trmkt.ptyp.fixed then
 							return(true)
 						endif
 					endselect
@@ -465,7 +471,7 @@ function extern boolean trmkt035.reid.is.valid(long mode)
 }
 function extern long trmkt035.isdt.check(long mode)
 {
-	if trmkt035.isdt > date.num()	then
+	if trmkt035.isdt > date.num() then
 		dal.set.error.message("trmkt0007")
 		|* Future date not allowed while adding a record
 		return(DALHOOKERROR)
@@ -479,7 +485,7 @@ function extern boolean trmkt035.empid.is.valid(long mode)
 	from	trmkt020
 	where	trmkt020._index1 = :trmkt035.empid
 	selectdo
-		if trmkt020.status = trmkt.acna.notactive	then
+		if trmkt020.status = trmkt.acna.notactive then
 			dal.set.error.message("trmkt0020")
 			|* Inactive Employee cannot be issued a resource
 			return(false)
@@ -498,7 +504,7 @@ function extern boolean trmkt035.acdt.is.valid(long mode)
 
 function extern boolean trmkt035.acdt.is.derived(long mode)
 {
-	if mode = DAL_NEW	then
+	if mode = DAL_NEW then
 		return(true)
 	else
 		return(false)
@@ -506,7 +512,7 @@ function extern boolean trmkt035.acdt.is.derived(long mode)
 }
 function extern boolean trmkt035.empid.is.derived(long mode)
 {
-	if mode = DAL_UPDATE	then
+	if mode = DAL_UPDATE then
 		return(true)
 	else
 		return(false)
@@ -514,7 +520,7 @@ function extern boolean trmkt035.empid.is.derived(long mode)
 }
 function extern boolean trmkt035.rsrc.is.derived(long mode)
 {
-	if mode = DAL_UPDATE	then
+	if mode = DAL_UPDATE then
 		return(true)
 	else
 		return(false)
@@ -522,7 +528,7 @@ function extern boolean trmkt035.rsrc.is.derived(long mode)
 }
 function extern boolean trmkt035.reid.is.derived(long mode)
 {
-	if mode = DAL_UPDATE	then
+	if mode = DAL_UPDATE then
 		return(true)
 	else
 		return(false)
@@ -530,7 +536,7 @@ function extern boolean trmkt035.reid.is.derived(long mode)
 }
 function extern boolean trmkt035.isdt.is.derived(long mode)
 {
-	if mode = DAL_UPDATE	then
+	if mode = DAL_UPDATE then
 		return(true)
 	else
 		return(false)
@@ -632,11 +638,12 @@ function extern long renew.resource()
 
 function extern boolean renew.resource.is.allowed()
 {
-	if trmkt035.acdt = trmkt035.pldt and trmkt035.status = trmkt.irre.issued then
+	if trmkt035.acdt = trmkt035.pldt
+	and trmkt035.status = trmkt.irre.issued then
 		return(true)
 	endif
 	return(false)
 }
 
 |*************************** internal functions section ************************
-|*************************** end of DAL source *********************************
+|*************************** end of DAL2 source *********************************
